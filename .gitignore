@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# local JWT key dump for Convex Auth (never commit)
+/docs/convex-auth-jwt-secrets.md
+
 # vercel
 .vercel
 

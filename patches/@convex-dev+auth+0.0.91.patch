@@ -1,0 +1,31 @@
+diff --git a/node_modules/@convex-dev/auth/dist/server/implementation/tokens.js b/node_modules/@convex-dev/auth/dist/server/implementation/tokens.js
+index fadbc0c..1b36185 100644
+--- a/node_modules/@convex-dev/auth/dist/server/implementation/tokens.js
++++ b/node_modules/@convex-dev/auth/dist/server/implementation/tokens.js
+@@ -3,8 +3,25 @@ import { requireEnv } from "../utils.js";
+ import { TOKEN_SUB_CLAIM_DIVIDER } from "./utils.js";
+ const DEFAULT_JWT_DURATION_MS = 1000 * 60 * 60; // 1 hour
+ const RESERVED_CLAIMS = new Set(["sub", "iss", "aud", "iat", "exp", "nbf", "jti"]);
++/** Strips BOM/quotes and rebuilds PEM so importPKCS8 sees a proper header at index 0. */
++function normalizePkcsFromEnv(raw) {
++    let s = raw.trim().replace(/^\uFEFF/, "");
++    if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
++        s = s.slice(1, -1).trim();
++    }
++    const header = "-----BEGIN PRIVATE KEY-----";
++    const footer = "-----END PRIVATE KEY-----";
++    const h = s.indexOf(header);
++    const f = s.indexOf(footer);
++    if (h === -1 || f === -1) {
++        return s;
++    }
++    const body = s.slice(h + header.length, f).replace(/\s+/g, "");
++    const lines = body.match(/.{1,64}/g) ?? [body];
++    return `${header}\n${lines.join("\n")}\n${footer}\n`;
++}
+ export async function generateToken(ctx, args, config) {
+-    const privateKey = await importPKCS8(requireEnv("JWT_PRIVATE_KEY"), "RS256");
++    const privateKey = await importPKCS8(normalizePkcsFromEnv(requireEnv("JWT_PRIVATE_KEY")), "RS256");
+     const expirationTime = new Date(Date.now() + (config.jwt?.durationMs ?? DEFAULT_JWT_DURATION_MS));
+     const extraClaims = {};
+     if (config.jwt?.customClaims) {
