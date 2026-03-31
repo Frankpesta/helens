@@ -29,19 +29,17 @@ export default function CheckoutDetailsPage() {
   const [delivery, setDelivery] = useState("standard_worldwide");
 
   useEffect(() => {
-    if (lines.length === 0) router.replace("/shop");
-  }, [lines.length, router]);
-
-  useEffect(() => {
     if (ctx === undefined) return;
     if (ctx.step === "sign-in") router.replace("/checkout/sign-in");
-    else if (ctx.step === "ready") router.replace("/checkout/summary");
   }, [ctx, router]);
 
-  /* eslint-disable react-hooks/set-state-in-effect -- hydrate form from Convex query */
   useEffect(() => {
-    if (ctx?.step !== "details" || !ctx.profile) return;
-    const p = ctx.profile;
+    const p =
+      ctx?.step === "ready" ? ctx.profile
+      : ctx?.step === "details" ? ctx.profile
+      : null;
+    if (!p) return;
+    /* eslint-disable react-hooks/set-state-in-effect -- hydrate profile from Convex */
     setFullName(p.fullName);
     setPhone(p.phone);
     setLine1(p.line1);
@@ -51,8 +49,8 @@ export default function CheckoutDetailsPage() {
     setPostalCode(p.postalCode);
     setCountry(p.country);
     setDelivery(p.preferredDeliveryOption);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [ctx]);
-  /* eslint-enable react-hooks/set-state-in-effect */
 
   const deliveryForForm =
     options && options.length > 0 ?
@@ -76,7 +74,8 @@ export default function CheckoutDetailsPage() {
         preferredDeliveryOption: deliveryForForm,
       });
       toast.success("Details saved");
-      router.push("/checkout/summary");
+      if (lines.length === 0) router.push("/account");
+      else router.push("/checkout/summary");
     } catch {
       toast.error("Could not save — check delivery option and try again.");
     }
@@ -86,6 +85,14 @@ export default function CheckoutDetailsPage() {
     return (
       <div className="flex min-h-[40vh] items-center justify-center pt-24 text-sm text-on-surface-variant">
         Loading…
+      </div>
+    );
+  }
+
+  if (ctx.step === "sign-in") {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center pt-24 text-sm text-on-surface-variant">
+        Redirecting…
       </div>
     );
   }

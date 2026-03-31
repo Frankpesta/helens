@@ -27,7 +27,12 @@ export const mySpendingSummary = query({
     let totalSpentCents = 0;
     let completedCount = 0;
     for (const o of orders) {
-      if (o.status === "paid" || o.status === "fulfilled") {
+      if (
+        o.status === "paid" ||
+        o.status === "processing" ||
+        o.status === "shipped" ||
+        o.status === "fulfilled"
+      ) {
         totalSpentCents += o.amountTotalCents ?? 0;
         completedCount += 1;
       }

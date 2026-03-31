@@ -93,7 +93,11 @@ export const saveProfile = mutation({
       .withIndex("by_userId", (q) => q.eq("userId", userId))
       .unique();
     if (existing) {
-      await ctx.db.patch(existing._id, { ...args, email, updatedAt: now });
+      await ctx.db.patch(existing._id, {
+        ...args,
+        email: email ?? existing.email,
+        updatedAt: now,
+      });
       return existing._id;
     }
     return await ctx.db.insert("customerProfiles", {

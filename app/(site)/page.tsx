@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { GoldButton } from "@/components/site/gold-button";
 import { formatMoney } from "@/lib/format";
 import { StarRating } from "@/components/site/star-rating";
 import { useCartStore } from "@/lib/cart-store";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import {
@@ -19,8 +20,14 @@ import {
   RoutineBand,
 } from "@/components/site/expert-blocks";
 import { SkinCareFaqSection } from "@/components/site/skin-care-faq";
-import { cartAddClickFeedback } from "@/lib/click-feedback";
 import { HeroBackgroundCarousel } from "@/components/site/hero-background-carousel";
+import {
+  homeHero,
+  homeNewsletter,
+  homeTestimonials,
+  homeValues,
+} from "@/lib/home-page-static";
+import { cartAddClickFeedback } from "@/lib/click-feedback";
 
 export default function HomePage() {
   const router = useRouter();
@@ -28,33 +35,26 @@ export default function HomePage() {
   const products = useQuery(api.products.listActive);
   const featured = useQuery(
     api.products.getByIds,
-    settings?.featuredProductIds?.length
-      ? { ids: settings.featuredProductIds }
-      : "skip",
+    settings?.featuredProductIds?.length ?
+      { ids: settings.featuredProductIds }
+    : "skip",
   );
   const add = useCartStore((s) => s.add);
   const pulseBag = useCartStore((s) => s.pulseBag);
+  const subscribeNewsletter = useMutation(api.newsletter.subscribe);
   const [ti, setTi] = useState(0);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterSending, setNewsletterSending] = useState(false);
 
-  const heroSrc = useMemo(() => {
-    const f = featured?.[0];
-    return f?.heroImagePath ?? "/products/serum-1.svg";
-  }, [featured]);
+  const t = homeTestimonials[ti % homeTestimonials.length];
 
-  if (!settings || !products) return null;
-
-  const testimonials =
-    settings.testimonials.length > 0 ?
-      settings.testimonials
-    : [
-        {
-          quote:
-            "The kind of organic line I can discuss professionally—with ingredient lists that hold up.",
-          author: "Helen",
-          title: "Founder & formulator",
-        },
-      ];
-  const t = testimonials[ti % testimonials.length];
+  if (!settings || !products) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center pt-24 text-sm text-on-surface-variant">
+        Loading…
+      </div>
+    );
+  }
 
   const rowTop =
     featured && featured.length > 0 ? featured : products.slice(0, 2);
@@ -66,24 +66,23 @@ export default function HomePage() {
 
   return (
     <div className="overflow-x-hidden bg-surface text-on-surface">
-      {/* Hero — full viewport, reference layout */}
       <section className="relative flex min-h-dvh items-center overflow-hidden pt-20 sm:pt-24">
         <HeroBackgroundCarousel />
         <div className="pointer-events-none absolute inset-0 z-1 bg-linear-to-r from-surface via-surface/55 to-transparent" />
         <div className="container relative z-10 mx-auto px-4 sm:px-6 md:px-12">
           <div className="max-w-2xl">
             <span className="mb-4 block font-sans text-xs font-medium uppercase tracking-[0.2em] text-gold sm:mb-6 sm:text-sm">
-              {settings.heroEyebrow}
+              {homeHero.eyebrow}
             </span>
             <h1 className="font-heading text-4xl font-bold leading-[1.05] tracking-tighter text-on-surface text-shadow-hero sm:text-5xl sm:leading-none md:text-7xl md:leading-none">
-              {settings.heroTitleLine1}
+              {homeHero.titleLine1}
               <br />
               <span className="font-normal italic text-gold">
-                {settings.heroTitleLine2Gold}
+                {homeHero.titleLine2Gold}
               </span>
             </h1>
             <p className="mt-6 max-w-lg font-sans text-base leading-relaxed text-on-surface-variant sm:mt-8 sm:text-lg md:text-xl">
-              {settings.heroDescription}
+              {homeHero.description}
             </p>
             <div className="mt-8 flex flex-col gap-4 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6 md:gap-8">
               <GoldButton
@@ -91,13 +90,13 @@ export default function HomePage() {
                 size="lg"
                 onClick={() => router.push("/shop")}
               >
-                {settings.heroCtaShop}
+                {homeHero.ctaShop}
               </GoldButton>
               <Link
                 href="/about"
                 className="group flex items-center gap-3 font-sans text-base font-semibold uppercase tracking-[0.2em] text-gold"
               >
-                {settings.heroCtaStory}
+                {homeHero.ctaStory}
                 <span className="h-px w-12 bg-gold transition-all group-hover:w-16" />
               </Link>
             </div>
@@ -107,7 +106,6 @@ export default function HomePage() {
 
       <CredentialsStrip />
 
-      {/* Featured products — bento */}
       <section className="bg-surface py-16 sm:py-20 md:py-32">
         <div className="container mx-auto px-4 sm:px-6 md:px-12">
           <div className="mb-12 flex flex-col justify-between gap-6 sm:mb-16 md:mb-20 md:flex-row md:items-end md:gap-8">
@@ -116,8 +114,9 @@ export default function HomePage() {
                 Featured products
               </h2>
               <p className="mt-3 font-sans text-base text-on-surface-variant sm:mt-4 sm:text-lg">
-                Concentrated, certified-organic-forward formulas chosen for daily
-                regimens—cleanse, treat, moisturize, and protect.
+                Concentrated, certified-organic-forward formulas for cleanse,
+                treat, moisturize, and protect—chosen for daily regimens that
+                respect barrier health.
               </p>
             </div>
             <span className="hidden font-heading text-base italic text-gold md:block">
@@ -126,11 +125,11 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-12 md:gap-8">
-            {large ? (
+            {large ?
               <div className="flex flex-col items-center gap-6 bg-surface-container p-6 sm:gap-8 sm:p-8 md:col-span-7 md:flex-row md:p-12">
                 <Link
                   href={`/product/${large.slug}`}
-                  className="relative aspect-[4/5] w-full overflow-hidden md:w-1/2"
+                  className="relative aspect-4/5 w-full overflow-hidden md:w-1/2"
                 >
                   <Image
                     src={large.heroImagePath ?? "/products/placeholder.svg"}
@@ -149,7 +148,7 @@ export default function HomePage() {
                       href={`/product/${large.slug}`}
                       className="hover:text-gold"
                     >
-          {large.name}
+                      {large.name}
                     </Link>
                   </h3>
                   <p className="mt-3 font-sans text-base leading-relaxed text-on-surface-variant">
@@ -174,9 +173,9 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-            ) : null}
+            : null}
 
-            {side ? (
+            {side ?
               <div className="flex flex-col justify-between bg-surface-container-low p-6 sm:p-8 md:col-span-5">
                 <div className="relative mb-8 aspect-square overflow-hidden">
                   <Link href={`/product/${side.slug}`}>
@@ -222,7 +221,7 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-            ) : null}
+            : null}
 
             {rowBottom.map((p, i) => (
               <div
@@ -279,14 +278,13 @@ export default function HomePage() {
 
       <RoutineBand />
 
-      {/* Philosophy / values */}
       <section
         id="standards"
         className="relative overflow-hidden bg-surface-container-lowest py-16 sm:py-20 md:py-32"
       >
         <div className="pointer-events-none absolute right-0 top-0 hidden h-full w-1/2 opacity-20 md:block">
           <Image
-            src={heroSrc}
+            src="/products/face-cream.png"
             alt=""
             fill
             className="object-cover"
@@ -300,14 +298,14 @@ export default function HomePage() {
                 Our standard for
                 <br />
                 <span className="font-normal italic text-gold">
-                  {settings.valuesTitle}
+                  {homeValues.title}
                 </span>
               </h2>
               <p className="mt-4 max-w-lg font-sans text-base text-on-surface-variant sm:text-lg">
-                {settings.valuesSubtitle}
+                {homeValues.subtitle}
               </p>
               <div className="mt-12 space-y-10">
-                {settings.valuesItems.map((item) => (
+                {homeValues.items.map((item) => (
                   <div key={item.step} className="flex gap-6">
                     <span className="font-heading text-2xl text-gold pt-1">
                       {item.step}
@@ -328,23 +326,20 @@ export default function HomePage() {
                   "No parabens",
                   "Verified suppliers",
                   "Stability tested",
-                ].map(
-                  (x) => (
-                    <span
-                      key={x}
-                      className="rounded-full border border-gold/25 bg-surface-container-low px-5 py-2 font-sans text-xs font-semibold uppercase tracking-[0.15em] text-on-surface-variant sm:text-sm"
-                    >
-                      {x}
-                    </span>
-                  ),
-                )}
+                ].map((x) => (
+                  <span
+                    key={x}
+                    className="rounded-full border border-gold/25 bg-surface-container-low px-5 py-2 font-sans text-xs font-semibold uppercase tracking-[0.15em] text-on-surface-variant sm:text-sm"
+                  >
+                    {x}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
       <section className="bg-surface py-16 sm:py-20 md:py-32">
         <div className="container mx-auto px-4 text-center sm:px-6 md:px-12">
           <div className="mx-auto max-w-4xl">
@@ -368,7 +363,7 @@ export default function HomePage() {
                 onClick={() =>
                   setTi(
                     (i) =>
-                      (i - 1 + testimonials.length) % testimonials.length,
+                      (i - 1 + homeTestimonials.length) % homeTestimonials.length,
                   )
                 }
               >
@@ -378,7 +373,9 @@ export default function HomePage() {
                 type="button"
                 className="flex size-12 items-center justify-center rounded-full border border-outline-variant text-on-surface transition-colors hover:border-gold hover:bg-gold hover:text-primary-foreground"
                 aria-label="Next testimonial"
-                onClick={() => setTi((i) => (i + 1) % testimonials.length)}
+                onClick={() =>
+                  setTi((i) => (i + 1) % homeTestimonials.length)
+                }
               >
                 <ChevronRight className="size-5" />
               </button>
@@ -389,31 +386,59 @@ export default function HomePage() {
 
       <SkinCareFaqSection />
 
-      {/* Newsletter CTA band */}
       <section className="border-t border-outline-variant/15 py-12 sm:py-16 md:py-20">
         <div className="container mx-auto px-4 sm:px-6 md:px-12">
           <div className="flex flex-col items-center justify-between gap-8 bg-surface-container-high p-6 sm:gap-10 sm:p-10 md:flex-row md:p-16">
             <div className="max-w-md text-center md:text-left">
               <h3 className="font-heading text-xl text-on-surface sm:text-2xl md:text-3xl">
-                {settings.newsletterHeading}
+                {homeNewsletter.heading}
               </h3>
               <p className="mt-3 font-sans text-on-surface-variant">
-                Occasional notes on new batches, organic sourcing, and
-                formulation education—no fluff.
+                {homeNewsletter.supporting}
               </p>
             </div>
             <form
               className="flex w-full max-w-md flex-col gap-3 sm:flex-row"
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={(e) => {
+                e.preventDefault();
+                setNewsletterSending(true);
+                void subscribeNewsletter({
+                  email: newsletterEmail,
+                  source: "home",
+                })
+                  .then((r) => {
+                    if (r.alreadySubscribed) {
+                      toast.message("You’re already on the list", {
+                        description: "We’ll keep the tips coming.",
+                      });
+                    } else {
+                      toast.success("You’re subscribed", {
+                        description: "Watch your inbox for skin care tips.",
+                      });
+                      setNewsletterEmail("");
+                    }
+                  })
+                  .catch((err: Error) =>
+                    toast.error(err.message ?? "Could not subscribe"),
+                  )
+                  .finally(() => setNewsletterSending(false));
+              }}
             >
               <input
                 type="email"
                 required
-                placeholder={settings.newsletterPlaceholder}
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                placeholder={homeNewsletter.placeholder}
+                autoComplete="email"
                 className="h-12 w-full border-0 bg-surface-container-lowest px-5 font-sans text-base text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-gold md:w-72"
               />
-              <GoldButton type="submit" className="h-12 min-h-12 w-full sm:w-auto">
-                Subscribe
+              <GoldButton
+                type="submit"
+                disabled={newsletterSending}
+                className="h-12 min-h-12 w-full sm:w-auto disabled:opacity-60"
+              >
+                {newsletterSending ? "Sending…" : "Subscribe"}
               </GoldButton>
             </form>
           </div>

@@ -27,9 +27,19 @@ function statusCopy(status: Doc<"orders">["status"]): {
       };
     case "paid":
       return {
-        label: "Processing",
+        label: "Paid",
         detail:
-          "Payment received. We will notify you when your order ships.",
+          "Payment received. We’ll email you when the status changes.",
+      };
+    case "processing":
+      return {
+        label: "Processing",
+        detail: "We’re packing your certified organic formulas.",
+      };
+    case "shipped":
+      return {
+        label: "Shipped",
+        detail: "Your parcel is on the way — check your inbox for details.",
       };
     case "fulfilled":
       return {
@@ -150,7 +160,7 @@ export default function AccountPage() {
             {formatMoney(summary.totalSpentCents)}
           </p>
           <p className="mt-1 font-sans text-xs text-on-surface-variant">
-            Completed purchases (paid &amp; fulfilled)
+            Successful checkouts (excludes canceled / unpaid)
           </p>
         </div>
         <div className="border border-outline-variant/25 bg-surface-container-low/40 p-5">
@@ -260,12 +270,12 @@ export default function AccountPage() {
       </div>
 
       <p className="mt-12 font-sans text-xs text-on-surface-variant">
-        Need to change your delivery address for a new order?{" "}
+        Update your saved delivery address anytime.{" "}
         <Link
           href="/checkout/details"
           className="inline-flex items-center gap-0.5 text-gold underline-offset-4 hover:underline"
         >
-          Update details at checkout
+          Edit delivery details
           <ChevronRight className="size-3" />
         </Link>
       </p>

@@ -62,24 +62,10 @@ function buildDefaultMainSiteSettings(
         title: "Licensed esthetician",
       },
     ],
-    newsletterHeading: "Formulation notes & launches",
-    newsletterPlaceholder: "Professional email",
+    newsletterHeading: "Skincare tips in your inbox",
+    newsletterPlaceholder: "Your email",
     footerTagline:
       "Certified organic skin care · Responsibly formulated · Mindful small-batch production",
-    updatedAt: now,
-  };
-}
-
-function buildDefaultJournalPost(now: number) {
-  return {
-    slug: "what-certified-organic-means-for-your-skin",
-    title: "What certified organic means—for your skin",
-    excerpt:
-      "Why we anchor our botanical core in certified organic agriculture, and how that supports cleaner formulas.",
-    body: "## More than a seal\n\n**Certified organic** agricultural ingredients are grown under standards that restrict synthetic pesticides and GMOs we choose not to formulate around. It is one part of how we keep the plant fraction of our work accountable.\n\n### How we formulate\n\nHelen's Beauty Secret pairs those botanicals with **well-studied actives**, **responsible preservation**, and **realistic usage guidance**. If an ingredient does not earn its place in performance or skin comfort, it leaves the brief.\n\n### Questions?\n\nOur care team is trained on every INCI list—email any time you want the nuance behind a choice.",
-    published: true,
-    publishedAt: now,
-    heroPublicPath: "/products/serum-1.svg",
     updatedAt: now,
   };
 }
@@ -942,7 +928,6 @@ export const seedIfEmpty = mutation({
       "siteSettings",
       buildDefaultMainSiteSettings(now, [insertedIds[0], insertedIds[1]]),
     );
-    await ctx.db.insert("journalPosts", buildDefaultJournalPost(now));
 
     return { seeded: true as const, count: insertedIds.length };
     }
@@ -954,12 +939,6 @@ export const seedIfEmpty = mutation({
         "siteSettings",
         buildDefaultMainSiteSettings(now, featured),
       );
-      repaired = true;
-    }
-
-    const anyJournal = await ctx.db.query("journalPosts").take(1);
-    if (anyJournal.length === 0) {
-      await ctx.db.insert("journalPosts", buildDefaultJournalPost(now));
       repaired = true;
     }
 

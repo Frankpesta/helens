@@ -1,6 +1,19 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "./lib/authz";
+
+export const getMainForEmail = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const doc = await ctx.db
+      .query("siteSettings")
+      .withIndex("by_key", (q) => q.eq("key", "main"))
+      .unique();
+    return {
+      brandName: doc?.brandName ?? "Helen's Beauty Secret",
+    };
+  },
+});
 
 export const getMain = query({
   args: {},
@@ -46,6 +59,9 @@ export const updateMain = mutation({
     newsletterPlaceholder: v.optional(v.string()),
     footerTagline: v.optional(v.string()),
     stripePublishableKeyHint: v.optional(v.string()),
+    instagramUrl: v.optional(v.string()),
+    facebookUrl: v.optional(v.string()),
+    pinterestUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);

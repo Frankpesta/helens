@@ -6,8 +6,9 @@ import {
   BookOpen,
   LayoutDashboard,
   LogOut,
+  Mail,
+  MailPlus,
   Package,
-  Settings2,
   ShoppingBag,
   Store,
 } from "lucide-react";
@@ -19,8 +20,9 @@ const nav = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
+  { href: "/admin/contact", label: "Contact", icon: Mail },
+  { href: "/admin/newsletter", label: "Newsletter", icon: MailPlus },
   { href: "/admin/journal", label: "Journal", icon: BookOpen },
-  { href: "/admin/settings", label: "Site", icon: Settings2 },
 ] as const;
 
 export function AdminSidebarContent({

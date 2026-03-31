@@ -47,6 +47,11 @@ const nav = [
   { href: "/about", label: "Philosophy", match: (p: string) => p.startsWith("/about") },
   { href: "/journal", label: "Journal", match: (p: string) => p.startsWith("/journal") },
   {
+    href: "/contact",
+    label: "Contact",
+    match: (p: string) => p.startsWith("/contact"),
+  },
+  {
     href: "/account",
     label: "Account",
     match: (p: string) => p.startsWith("/account") || p.startsWith("/sign-in"),

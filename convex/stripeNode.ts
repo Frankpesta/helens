@@ -45,7 +45,7 @@ export const fulfillCheckout = internalAction({
       shipping: (session as unknown as { shipping_details?: unknown })
         .shipping_details ?? null,
     };
-    await ctx.runMutation(internal.orders.markPaidFromStripe, {
+    const orderId = await ctx.runMutation(internal.orders.markPaidFromStripe, {
       stripeCheckoutSessionId: session.id,
       stripePaymentIntentId: pi,
       email,
@@ -53,5 +53,12 @@ export const fulfillCheckout = internalAction({
       currency: session.currency?.toUpperCase(),
       shippingSnapshot: JSON.stringify(shipPayload),
     });
+    try {
+      await ctx.runAction(internal.emailNode.sendOrderConfirmation, {
+        orderId,
+      });
+    } catch (err) {
+      console.error("Order confirmation email failed", err);
+    }
   },
 });

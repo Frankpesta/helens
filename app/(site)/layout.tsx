@@ -51,6 +51,9 @@ export default function SiteLayout({
       <SiteFooter
         brandName={settings.brandName}
         tagline={settings.footerTagline}
+        instagramUrl={settings.instagramUrl}
+        facebookUrl={settings.facebookUrl}
+        pinterestUrl={settings.pinterestUrl}
       />
     </div>
   );

@@ -102,6 +102,21 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_userId", ["userId"]),
 
+  contactMessages: defineTable({
+    name: v.string(),
+    email: v.string(),
+    message: v.string(),
+    createdAt: v.number(),
+    read: v.boolean(),
+  }),
+
+  /** Marketing email list sign-ups from the storefront (e.g. home page). */
+  newsletterSubscribers: defineTable({
+    email: v.string(),
+    createdAt: v.number(),
+    source: v.optional(v.string()),
+  }).index("by_email", ["email"]),
+
   siteSettings: defineTable({
     key: v.literal("main"),
     brandName: v.string(),
@@ -132,6 +147,9 @@ export default defineSchema({
     newsletterPlaceholder: v.string(),
     footerTagline: v.string(),
     stripePublishableKeyHint: v.optional(v.string()),
+    instagramUrl: v.optional(v.string()),
+    facebookUrl: v.optional(v.string()),
+    pinterestUrl: v.optional(v.string()),
     updatedAt: v.number(),
   }).index("by_key", ["key"]),
 
@@ -145,9 +163,13 @@ export default defineSchema({
     status: v.union(
       v.literal("pending_payment"),
       v.literal("paid"),
+      v.literal("processing"),
+      v.literal("shipped"),
       v.literal("fulfilled"),
       v.literal("canceled"),
     ),
+    /** Set when order confirmation email was sent (idempotent). */
+    orderConfirmationSentAt: v.optional(v.number()),
     amountTotalCents: v.optional(v.number()),
     currency: v.optional(v.string()),
     lineItems: v.array(
