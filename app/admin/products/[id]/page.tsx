@@ -16,6 +16,12 @@ import {
   parseBeforeAfterText,
   parseIngredientsText,
 } from "@/lib/admin-product-parsers";
+import {
+  emptyStoryFields,
+  ProductStorySections,
+  storyFieldsToConvexExtras,
+  type AdminProductStoryFields,
+} from "@/components/admin/product-story-sections";
 
 export default function AdminProductEditPage({
   params,
@@ -37,6 +43,7 @@ export default function AdminProductEditPage({
     return Math.max(...imagesRows.map((r) => r.sortOrder)) + 1;
   }, [imagesRows]);
 
+  const [story, setStory] = useState<AdminProductStoryFields>(emptyStoryFields);
   const [form, setForm] = useState({
     name: "",
     slug: "",
@@ -45,6 +52,7 @@ export default function AdminProductEditPage({
     longDescription: "",
     priceCents: 0,
     isActive: true,
+    trackInventory: true,
     inventoryCount: 0,
     stripePriceId: "",
     heroImagePath: "",
@@ -65,6 +73,7 @@ export default function AdminProductEditPage({
       longDescription: product.longDescription ?? "",
       priceCents: product.priceCents,
       isActive: product.isActive,
+      trackInventory: product.trackInventory,
       inventoryCount: product.inventoryCount ?? 0,
       stripePriceId: product.stripePriceId ?? "",
       heroImagePath: product.heroImagePath ?? "",
@@ -77,6 +86,23 @@ export default function AdminProductEditPage({
           return `${k}|${p}|${s.alt}`;
         })
         .join("\n"),
+    });
+    setStory({
+      features: product.features.map((f) => ({ ...f })),
+      ritualSteps: product.ritualSteps.map((s) => ({ ...s })),
+      ratingAverage:
+        product.ratingAverage != null && product.ratingAverage > 0 ?
+          String(product.ratingAverage)
+        : "",
+      ratingCount:
+        product.ratingCount != null && product.ratingCount > 0 ?
+          String(product.ratingCount)
+        : "",
+      testimonialQuote: product.testimonialQuote ?? "",
+      testimonialAuthor: product.testimonialAuthor ?? "",
+      testimonialTitle: product.testimonialTitle ?? "",
+      seoTitle: product.seoTitle ?? "",
+      seoDescription: product.seoDescription ?? "",
     });
   }, [product]);
 
@@ -96,7 +122,7 @@ export default function AdminProductEditPage({
   }
 
   return (
-    <div className="mx-auto max-w-xl space-y-8">
+    <div className="mx-auto max-w-2xl space-y-8">
       <div>
         <Link href="/admin/products" className="text-xs text-gold hover:underline">
           ← Products
@@ -107,6 +133,7 @@ export default function AdminProductEditPage({
         className="space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
+          const storyExtras = storyFieldsToConvexExtras(story, "update");
           void update({
             id,
             name: form.name,
@@ -116,12 +143,17 @@ export default function AdminProductEditPage({
             longDescription: form.longDescription || undefined,
             priceCents: Number(form.priceCents),
             isActive: form.isActive,
-            inventoryCount: Number(form.inventoryCount),
+            trackInventory: form.trackInventory,
+            inventoryCount:
+              form.trackInventory ?
+                Math.max(0, Number(form.inventoryCount) || 0)
+              : undefined,
             stripePriceId: form.stripePriceId || undefined,
             heroImagePath: form.heroImagePath || undefined,
             ingredients: parseIngredientsText(form.ingredientsText),
             howToUse: form.howToUse.trim() || undefined,
             beforeAfterSlides: parseBeforeAfterText(form.beforeAfterText),
+            ...storyExtras,
           })
             .then(() => toast.success("Saved"))
             .catch(() => toast.error("Save failed"));
@@ -220,6 +252,9 @@ export default function AdminProductEditPage({
             or <code className="text-gold">after|...</code>
           </p>
         </div>
+
+        <ProductStorySections value={story} onChange={setStory} />
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="price">Price (cents)</Label>
@@ -236,10 +271,12 @@ export default function AdminProductEditPage({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="inv">Inventory</Label>
+            <Label htmlFor="inv">Inventory (when tracking)</Label>
             <Input
               id="inv"
               type="number"
+              min={0}
+              disabled={!form.trackInventory}
               value={form.inventoryCount}
               onChange={(e) =>
                 setForm((f) => ({
@@ -270,16 +307,29 @@ export default function AdminProductEditPage({
             }
           />
         </div>
-        <div className="flex items-center gap-2">
-          <input
-            id="active"
-            type="checkbox"
-            checked={form.isActive}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, isActive: e.target.checked }))
-            }
-          />
-          <Label htmlFor="active">Active</Label>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
+          <div className="flex items-center gap-2">
+            <input
+              id="active"
+              type="checkbox"
+              checked={form.isActive}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, isActive: e.target.checked }))
+              }
+            />
+            <Label htmlFor="active">Active</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              id="trackInv"
+              type="checkbox"
+              checked={form.trackInventory}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, trackInventory: e.target.checked }))
+              }
+            />
+            <Label htmlFor="trackInv">Track inventory</Label>
+          </div>
         </div>
         <Button type="submit" className="bg-gold text-primary-foreground">
           Save changes

@@ -15,6 +15,11 @@ import {
   parseIngredientsText,
   slugify,
 } from "@/lib/admin-product-parsers";
+import {
+  emptyStoryFields,
+  ProductStorySections,
+  storyFieldsToConvexExtras,
+} from "@/components/admin/product-story-sections";
 
 export default function AdminNewProductPage() {
   const router = useRouter();
@@ -27,6 +32,7 @@ export default function AdminNewProductPage() {
   }, [products]);
 
   const [slugTouched, setSlugTouched] = useState(false);
+  const [story, setStory] = useState(emptyStoryFields);
   const [form, setForm] = useState({
     name: "",
     slug: "",
@@ -49,15 +55,16 @@ export default function AdminNewProductPage() {
   }
 
   return (
-    <div className="mx-auto max-w-xl space-y-8">
+    <div className="mx-auto max-w-2xl space-y-8">
       <div>
         <Link href="/admin/products" className="text-xs text-gold hover:underline">
           ← Products
         </Link>
         <h1 className="mt-2 font-heading text-2xl">New product</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Core listing fields, ingredients, how to use, and optional before/after
-          slides (public paths). Upload gallery images after saving.
+          All storefront sections: listing, highlights, regimen, ratings,
+          testimonial, SEO, ingredients, before/after. Upload gallery images after
+          saving.
         </p>
       </div>
       <form
@@ -71,6 +78,7 @@ export default function AdminNewProductPage() {
             return;
           }
           const slides = parseBeforeAfterText(form.beforeAfterText);
+          const storyExtras = storyFieldsToConvexExtras(story, "create");
           void createProduct({
             name,
             slug,
@@ -85,12 +93,11 @@ export default function AdminNewProductPage() {
             trackInventory: form.trackInventory,
             inventoryCount:
               form.trackInventory ? Math.max(0, Number(form.inventoryCount) || 0) : undefined,
-            features: [],
-            ritualSteps: [],
             heroImagePath: form.heroImagePath.trim() || undefined,
             ingredients: parseIngredientsText(form.ingredientsText),
             howToUse: form.howToUse.trim() || undefined,
             beforeAfterSlides: slides.length ? slides : undefined,
+            ...storyExtras,
           })
             .then((id) => {
               toast.success("Product created");
@@ -207,6 +214,9 @@ export default function AdminNewProductPage() {
             screen after creation.
           </p>
         </div>
+
+        <ProductStorySections value={story} onChange={setStory} />
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="price">Price (cents)</Label>
