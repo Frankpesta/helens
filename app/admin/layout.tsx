@@ -14,6 +14,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { AdminSidebarContent } from "@/components/admin/admin-sidebar-content";
+import { LoadingLogoScreen } from "@/components/site/loading-logo-screen";
 
 export default function AdminLayout({
   children,
@@ -45,11 +46,7 @@ export default function AdminLayout({
   }
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
-        Checking session…
-      </div>
-    );
+    return <LoadingLogoScreen variant="admin" size="full" />;
   }
 
   if (!isAuthenticated) {

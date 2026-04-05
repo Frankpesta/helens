@@ -14,6 +14,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import type { Doc } from "@/convex/_generated/dataModel";
+import { LoadingLogoScreen } from "@/components/site/loading-logo-screen";
 
 function statusCopy(status: Doc<"orders">["status"]): {
   label: string;
@@ -78,9 +79,11 @@ export default function AccountPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center pt-24 text-sm text-on-surface-variant">
-        Loading…
-      </div>
+      <LoadingLogoScreen
+        variant="site"
+        size="compact"
+        className="pt-24 text-on-surface-variant"
+      />
     );
   }
 

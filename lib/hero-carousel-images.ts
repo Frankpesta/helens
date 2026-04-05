@@ -7,6 +7,9 @@ export const HERO_BACKGROUND_CAROUSEL_IMAGES: readonly string[] = [
   "/products/collagen-booster.png",
   "/products/face-cream.png",
   "/products/mask.png",
+  "/products/cleanser.png",
+  "/products/brightening.png",
+  "/products/age-reversal.png", 
 ];
 
-export const HERO_CAROUSEL_INTERVAL_MS = 7000;
+export const HERO_CAROUSEL_INTERVAL_MS = 5000;

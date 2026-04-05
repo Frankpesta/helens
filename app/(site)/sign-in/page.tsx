@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LoadingLogoScreen } from "@/components/site/loading-logo-screen";
 
 function safeNextPath(raw: string | null): string {
   if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return "/account";
@@ -165,9 +166,11 @@ export default function SignInPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-[40vh] items-center justify-center pt-24 text-sm text-on-surface-variant">
-          Loading…
-        </div>
+        <LoadingLogoScreen
+          variant="site"
+          size="compact"
+          className="min-h-[40vh] pt-24 text-on-surface-variant"
+        />
       }
     >
       <SignInInner />

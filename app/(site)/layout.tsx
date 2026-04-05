@@ -5,6 +5,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
+import { LoadingLogoScreen } from "@/components/site/loading-logo-screen";
 import { Button } from "@/components/ui/button";
 
 export default function SiteLayout({
@@ -15,11 +16,7 @@ export default function SiteLayout({
   const settings = useQuery(api.siteSettings.getMain);
 
   if (settings === undefined) {
-    return (
-      <div className="flex min-h-screen items-center justify-center pt-24 text-sm text-on-surface-variant">
-        Loading…
-      </div>
-    );
+    return <LoadingLogoScreen variant="site" size="full" />;
   }
 
   if (!settings) {

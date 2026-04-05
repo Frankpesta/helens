@@ -187,6 +187,33 @@
     }
   }
 
+  @keyframes logo-pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+      filter: drop-shadow(0 0 0 transparent);
+    }
+    50% {
+      opacity: 0.85;
+      transform: scale(1.045);
+      filter: drop-shadow(0 0 18px oklch(0.9 0.14 88 / 0.28));
+    }
+  }
+
+  .loading-logo-pulse {
+    animation: logo-pulse 2.2s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loading-logo-pulse {
+      animation: none;
+      opacity: 1;
+      filter: none;
+      transform: none;
+    }
+  }
+
   .gold-gradient {
     background: linear-gradient(45deg, #f2ca50 0%, #d4af37 100%);
   }
