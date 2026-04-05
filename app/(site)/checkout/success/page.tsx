@@ -6,6 +6,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useCartStore } from "@/lib/cart-store";
 import { useEffect, Suspense } from "react";
+import { LoadingLogoScreen } from "@/components/site/loading-logo-screen";
 import { formatMoney } from "@/lib/format";
 
 function SuccessInner() {
@@ -33,7 +34,14 @@ function SuccessInner() {
   }
 
   if (order === undefined) {
-    return <p className="text-sm text-muted-foreground">Confirming order…</p>;
+    return (
+      <LoadingLogoScreen
+        variant="site"
+        size="compact"
+        srText="Confirming order"
+        className="bg-transparent! min-h-[32vh] py-8 text-muted-foreground"
+      />
+    );
   }
 
   if (!order || order.status !== "paid") {
@@ -84,7 +92,15 @@ function SuccessInner() {
 export default function CheckoutSuccessPage() {
   return (
     <div className="mx-auto max-w-lg px-4 py-20 sm:px-6">
-      <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
+      <Suspense
+        fallback={
+          <LoadingLogoScreen
+            variant="site"
+            size="compact"
+            className="bg-transparent! min-h-[32vh] py-12 text-muted-foreground"
+          />
+        }
+      >
         <SuccessInner />
       </Suspense>
     </div>

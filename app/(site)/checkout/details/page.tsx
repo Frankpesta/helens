@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCartStore } from "@/lib/cart-store";
 import { toast } from "sonner";
+import { LoadingLogoScreen } from "@/components/site/loading-logo-screen";
 
 export default function CheckoutDetailsPage() {
   const router = useRouter();
@@ -83,17 +84,22 @@ export default function CheckoutDetailsPage() {
 
   if (ctx === undefined || options === undefined) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center pt-24 text-sm text-on-surface-variant">
-        Loading…
-      </div>
+      <LoadingLogoScreen
+        variant="site"
+        size="compact"
+        className="min-h-[40vh] pt-24 text-on-surface-variant"
+      />
     );
   }
 
   if (ctx.step === "sign-in") {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center pt-24 text-sm text-on-surface-variant">
-        Redirecting…
-      </div>
+      <LoadingLogoScreen
+        variant="site"
+        size="compact"
+        srText="Redirecting"
+        className="min-h-[40vh] pt-24 text-on-surface-variant"
+      />
     );
   }
 

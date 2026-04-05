@@ -8,7 +8,7 @@ export default function AboutPage() {
   return (
     <div className="bg-surface text-on-surface">
       <section className="border-b border-outline-variant/15 bg-surface-container-low/50">
-        <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20 md:py-24">
+        <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24 md:py-24">
           <p className="font-sans text-xs font-semibold uppercase tracking-[0.28em] text-gold sm:text-sm">
             About us
           </p>

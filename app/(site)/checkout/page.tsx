@@ -5,6 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useCartStore } from "@/lib/cart-store";
+import { LoadingLogoScreen } from "@/components/site/loading-logo-screen";
 
 export default function CheckoutEntryPage() {
   const router = useRouter();
@@ -26,8 +27,11 @@ export default function CheckoutEntryPage() {
   }, [ctx, lines.length, router]);
 
   return (
-    <div className="flex min-h-[50vh] items-center justify-center px-6 pt-24 text-sm text-on-surface-variant">
-      Preparing checkout…
-    </div>
+    <LoadingLogoScreen
+      variant="site"
+      size="compact"
+      srText="Preparing checkout"
+      className="min-h-[50vh] pt-24 text-on-surface-variant"
+    />
   );
 }

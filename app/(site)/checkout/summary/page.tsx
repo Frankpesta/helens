@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { animate } from "animejs";
 import { toast } from "sonner";
 import { ChevronRight, ShieldCheck } from "lucide-react";
+import { LoadingLogoScreen } from "@/components/site/loading-logo-screen";
 
 export default function CheckoutSummaryPage() {
   const router = useRouter();
@@ -117,13 +118,24 @@ export default function CheckoutSummaryPage() {
     deliveryOption === null
   ) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center pt-24 text-sm text-on-surface-variant">
-        Loading…
-      </div>
+      <LoadingLogoScreen
+        variant="site"
+        size="compact"
+        className="min-h-[40vh] pt-24 text-on-surface-variant"
+      />
     );
   }
 
   return (
+    <>
+      {loading ? (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-surface/95 backdrop-blur-sm">
+          <LoadingLogoScreen
+            logoOnly
+            srText="Redirecting to secure checkout"
+          />
+        </div>
+      ) : null}
     <div className="mx-auto max-w-6xl px-6 pb-32 pt-28 md:px-10 md:pt-32">
       <div className="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:gap-y-0">
         <div className="lg:col-span-7">
@@ -326,5 +338,6 @@ export default function CheckoutSummaryPage() {
         </aside>
       </div>
     </div>
+    </>
   );
 }
