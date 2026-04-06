@@ -59,7 +59,7 @@ export default function HomePage() {
   const rowTop =
     featured && featured.length > 0 ? featured : products.slice(0, 2);
   const rest = products.filter((p) => !rowTop.some((x) => x._id === p._id));
-  const rowBottom = rest.slice(0, 3);
+  const rowBottom = rest.slice(0, 5);
 
   const large = rowTop[0];
   const side = rowTop[1];
@@ -223,11 +223,12 @@ export default function HomePage() {
               </div>
             : null}
 
+            <div className="col-span-full grid w-full grid-cols-1 gap-4 min-[480px]:grid-cols-2 min-[480px]:gap-5 md:grid-cols-3 md:gap-6 lg:gap-8">
             {rowBottom.map((p, i) => (
               <div
                 key={p._id}
                 className={cn(
-                  "flex flex-col justify-between p-6 sm:p-8 md:col-span-4",
+                  "flex h-full min-h-0 flex-col justify-between p-4 sm:p-6 md:p-7 lg:p-8",
                   i % 2 === 0 ?
                     "bg-surface-container-low"
                   : "bg-surface-container",
@@ -235,24 +236,24 @@ export default function HomePage() {
               >
                 <Link
                   href={`/product/${p.slug}`}
-                  className="relative mb-8 aspect-square overflow-hidden"
+                  className="relative mb-5 aspect-square w-full min-h-0 overflow-hidden sm:mb-6 md:mb-8"
                 >
                   <Image
                     src={p.heroImagePath ?? "/products/placeholder.svg"}
                     alt={p.name}
                     fill
                     className="object-cover transition-transform duration-700 hover:scale-[1.02]"
-                    sizes="(min-width: 768px) 30vw, 100vw"
+                    sizes="(max-width: 479px) 100vw, (max-width: 767px) 50vw, 33vw"
                   />
                 </Link>
-                <div>
-                  <h3 className="font-heading text-2xl text-on-surface">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-heading text-lg leading-snug text-on-surface sm:text-xl md:text-2xl">
                     <Link href={`/product/${p.slug}`} className="hover:text-gold">
                       {p.name}
                     </Link>
                   </h3>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="font-heading text-lg">
+                  <div className="mt-3 flex flex-col gap-3 min-[400px]:flex-row min-[400px]:items-center min-[400px]:justify-between min-[400px]:gap-2 sm:mt-4">
+                    <span className="font-heading text-base tabular-nums text-on-surface sm:text-lg">
                       {formatMoney(p.priceCents)}
                     </span>
                     <button
@@ -270,6 +271,7 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
+            </div>
           </div>
         </div>
       </section>
