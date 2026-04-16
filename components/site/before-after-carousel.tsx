@@ -10,7 +10,6 @@ import { animate } from "animejs";
 type Slide = {
   alt: string;
   url: string;
-  kind?: "before" | "after";
 };
 
 function subscribeReducedMotion(cb: () => void) {
@@ -54,10 +53,6 @@ export function BeforeAfterCarousel({ slides }: { slides: Slide[] }) {
   if (slides.length === 0) return null;
 
   const slide = slides[i]!;
-  const label =
-    slide.kind === "before" ? "Before"
-    : slide.kind === "after" ? "After"
-    : null;
 
   return (
     <div className="relative overflow-hidden border border-outline-variant/25 bg-surface-container-lowest">
@@ -72,11 +67,6 @@ export function BeforeAfterCarousel({ slides }: { slides: Slide[] }) {
           className="object-cover"
           sizes="(min-width: 768px) 45vw, 100vw"
         />
-        {label ? (
-          <span className="absolute left-4 top-4 border border-gold/50 bg-surface/85 px-3 py-1 font-sans text-[10px] uppercase tracking-[0.2em] text-gold backdrop-blur-sm">
-            {label}
-          </span>
-        ) : null}
       </div>
       {slides.length > 1 ? (
         <>

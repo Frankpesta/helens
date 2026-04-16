@@ -6,33 +6,38 @@ export function parseIngredientsText(raw: string): string[] {
     .filter(Boolean);
 }
 
-/** Format: before|/path|Alt or after|/path|Alt (public path or uploaded later on edit). */
+/**
+ * One carousel slide per line: `/path/to/image|Alt text` or `/path` only.
+ * Legacy lines `before|/path|Alt` / `after|/path|Alt` still parse (kind ignored).
+ */
 export function parseBeforeAfterText(raw: string): {
   alt: string;
   publicPath: string;
-  kind: "before" | "after";
 }[] {
   const lines = raw
     .split("\n")
     .map((s) => s.trim())
     .filter(Boolean);
-  const out: {
-    alt: string;
-    publicPath: string;
-    kind: "before" | "after";
-  }[] = [];
+  const out: { alt: string; publicPath: string }[] = [];
   for (const line of lines) {
     const parts = line.split("|").map((s) => s.trim());
-    const kind = parts[0];
-    const path = parts[1];
-    const alt = parts.slice(2).join("|").trim() || kind || "Slide";
-    if (kind !== "before" && kind !== "after") continue;
-    if (!path) continue;
-    out.push({
-      kind,
-      publicPath: path,
-      alt,
-    });
+    const first = parts[0];
+    if (!first) continue;
+
+    let publicPath: string;
+    let alt: string;
+
+    if (first === "before" || first === "after") {
+      publicPath = parts[1] ?? "";
+      alt =
+        parts.slice(2).join("|").trim() || first || "Before and after";
+    } else {
+      publicPath = first;
+      alt = parts.slice(1).join("|").trim() || "Before and after";
+    }
+
+    if (!publicPath) continue;
+    out.push({ publicPath, alt });
   }
   return out;
 }

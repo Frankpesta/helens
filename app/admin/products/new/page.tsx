@@ -199,8 +199,8 @@ export default function AdminNewProductPage() {
             id="beforeAfter"
             rows={3}
             placeholder={[
-              "before|/products/serum-1.svg|Week 1",
-              "after|/products/cream-1.svg|Week 6",
+              "/products/before-after-1.jpg|Week 8",
+              "/products/before-after-2.jpg",
             ].join("\n")}
             value={form.beforeAfterText}
             onChange={(e) =>
@@ -208,10 +208,9 @@ export default function AdminNewProductPage() {
             }
           />
           <p className="text-[11px] text-muted-foreground">
-            Format:{" "}
-            <code className="text-gold">before|/path/to/image|Alt text</code> or{" "}
-            <code className="text-gold">after|...</code>. Add uploads on the edit
-            screen after creation.
+            Format: <code className="text-gold">/path/to/image|Alt text</code> or{" "}
+            <code className="text-gold">/path/to/image</code>. Add uploads on the
+            edit screen after creation.
           </p>
         </div>
 

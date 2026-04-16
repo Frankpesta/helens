@@ -50,9 +50,6 @@ export default defineSchema({
           alt: v.string(),
           publicPath: v.optional(v.string()),
           storageId: v.optional(v.id("_storage")),
-          kind: v.optional(
-            v.union(v.literal("before"), v.literal("after")),
-          ),
         }),
       ),
     ),

@@ -7,7 +7,6 @@ const beforeAfterSlideArg = v.object({
   alt: v.string(),
   publicPath: v.optional(v.string()),
   storageId: v.optional(v.id("_storage")),
-  kind: v.optional(v.union(v.literal("before"), v.literal("after"))),
 });
 
 function buildDefaultMainSiteSettings(
@@ -216,14 +215,14 @@ export const getBeforeAfterGallery = query({
     const p = await ctx.db.get(args.productId);
     const slides = p?.beforeAfterSlides;
     if (!slides?.length) return [];
-    const out: { alt: string; url: string; kind?: "before" | "after" }[] = [];
+    const out: { alt: string; url: string }[] = [];
     for (const s of slides) {
       let url = s.publicPath ?? "/products/placeholder.svg";
       if (s.storageId) {
         const signed = await ctx.storage.getUrl(s.storageId);
         if (signed) url = signed;
       }
-      out.push({ alt: s.alt, url, kind: s.kind });
+      out.push({ alt: s.alt, url });
     }
     return out;
   },
@@ -509,12 +508,10 @@ export const seedIfEmpty = mutation({
           {
             alt: "Baseline uneven tone",
             publicPath: "/products/serum-1.svg",
-            kind: "before" as const,
           },
           {
             alt: "After 8 weeks — clinical photography",
             publicPath: "/products/cream-1.svg",
-            kind: "after" as const,
           },
         ],
       },
@@ -583,12 +580,10 @@ export const seedIfEmpty = mutation({
           {
             alt: "Before — barrier stress",
             publicPath: "/products/oil-1.svg",
-            kind: "before" as const,
           },
           {
             alt: "After — smoother AM texture",
             publicPath: "/products/serum-1.svg",
-            kind: "after" as const,
           },
         ],
       },
@@ -656,12 +651,10 @@ export const seedIfEmpty = mutation({
           {
             alt: "Before — congested T-zone",
             publicPath: "/products/cleanser-1.svg",
-            kind: "before" as const,
           },
           {
             alt: "After — calmer clarity",
             publicPath: "/products/mask-1.svg",
-            kind: "after" as const,
           },
         ],
       },
@@ -729,12 +722,10 @@ export const seedIfEmpty = mutation({
           {
             alt: "Before — dehydrated combination skin",
             publicPath: "/products/cream-1.svg",
-            kind: "before" as const,
           },
           {
             alt: "After — even moisture",
             publicPath: "/products/spf-1.svg",
-            kind: "after" as const,
           },
         ],
       },
@@ -803,12 +794,10 @@ export const seedIfEmpty = mutation({
           {
             alt: "Before — photo day, no SPF habit",
             publicPath: "/products/spf-1.svg",
-            kind: "before" as const,
           },
           {
             alt: "After — even, protected base",
             publicPath: "/products/cream-1.svg",
-            kind: "after" as const,
           },
         ],
       },
@@ -877,12 +866,10 @@ export const seedIfEmpty = mutation({
           {
             alt: "Before — weekly buildup",
             publicPath: "/products/mask-1.svg",
-            kind: "before" as const,
           },
           {
             alt: "After — refined pores",
             publicPath: "/products/cleanser-1.svg",
-            kind: "after" as const,
           },
         ],
       },

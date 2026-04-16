@@ -81,10 +81,12 @@ export default function AdminProductEditPage({
       howToUse: product.howToUse ?? "",
       beforeAfterText: (product.beforeAfterSlides ?? [])
         .map((s) => {
-          const k = s.kind ?? "before";
           const p = s.publicPath ?? "";
-          return `${k}|${p}|${s.alt}`;
+          if (!p) return "";
+          const a = (s.alt ?? "").trim();
+          return a ? `${p}|${a}` : p;
         })
+        .filter(Boolean)
         .join("\n"),
     });
     setStory({
@@ -239,8 +241,8 @@ export default function AdminProductEditPage({
             id="beforeAfter"
             rows={3}
             placeholder={[
-              "before|/products/serum-1.svg|Week 1",
-              "after|/products/cream-1.svg|Week 6",
+              "/products/before-after-1.jpg|Clinical photography week 8",
+              "/products/before-after-2.jpg",
             ].join("\n")}
             value={form.beforeAfterText}
             onChange={(e) =>
@@ -248,8 +250,9 @@ export default function AdminProductEditPage({
             }
           />
           <p className="text-[11px] text-muted-foreground">
-            Format: <code className="text-gold">before|/path.svg|Alt text</code>{" "}
-            or <code className="text-gold">after|...</code>
+            Format: <code className="text-gold">/path/to/image|Alt text</code>{" "}
+            or <code className="text-gold">/path/to/image</code> (optional alt
+            defaults to &quot;Before and after&quot;).
           </p>
         </div>
 
