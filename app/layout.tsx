@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/sonner";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
+import { getSiteUrl } from "@/lib/site-url";
+import { SITE_PHONE_TEL } from "@/lib/site-contact";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -21,18 +23,49 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = getSiteUrl();
+const defaultTitle = "Helen's Beauty Secret | Certified Organic Skin Care";
+const defaultDescription =
+  "Certified organic botanicals, lab-disciplined formulation, and full ingredient transparency. Professional skin care for healthy, resilient skin.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Helen's Beauty Secret | Certified Organic Skin Care",
+    default: defaultTitle,
     template: "%s | Helen's Beauty Secret",
   },
-  description:
-    "Certified organic botanicals, lab-disciplined formulation, and full ingredient transparency. Professional skin care for healthy, resilient skin.",
+  description: defaultDescription,
+  applicationName: "Helen's Beauty Secret",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: "Helen's Beauty Secret",
+    title: defaultTitle,
+    description: defaultDescription,
+    images: [{ url: "/logo.png", alt: "Helen's Beauty Secret" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: defaultDescription,
+    images: ["/logo.png"],
+  },
 };
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Helen's Beauty Secret",
+  url: siteUrl,
+  logo: `${siteUrl}/logo.png`,
+  telephone: SITE_PHONE_TEL.replace(/^tel:/, ""),
+} as const;
 
 export default function RootLayout({
   children,
@@ -50,6 +83,13 @@ export default function RootLayout({
       )}
     >
       <body className="flex min-h-full flex-col bg-background font-sans antialiased">
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger -- JSON-LD for crawlers
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
+        />
         <ConvexAuthNextjsServerProvider>
           <Providers>
             {children}
