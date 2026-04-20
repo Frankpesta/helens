@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { SITE_PHONE_DISPLAY, SITE_PHONE_TEL } from "@/lib/site-contact";
 
 export default function ContactPage() {
   const submit = useMutation(api.contact.submit);
@@ -28,6 +29,15 @@ export default function ContactPage() {
       <p className="mt-3 font-sans text-sm leading-relaxed text-on-surface-variant">
         Questions about ingredients, orders, or professional use — send a note
         and we&apos;ll reply by email.
+      </p>
+      <p className="mt-4 font-sans text-sm text-on-surface">
+        <span className="text-on-surface-variant">Phone: </span>
+        <a
+          href={SITE_PHONE_TEL}
+          className="text-gold underline-offset-4 transition-colors hover:text-gold/80 hover:underline"
+        >
+          {SITE_PHONE_DISPLAY}
+        </a>
       </p>
 
       <form

@@ -7,6 +7,7 @@ import {
   InstagramGlyph,
   PinterestGlyph,
 } from "@/components/site/social-glyph";
+import { SITE_PHONE_DISPLAY, SITE_PHONE_TEL } from "@/lib/site-contact";
 
 export function SiteFooter({
   brandName,
@@ -49,6 +50,14 @@ export function SiteFooter({
           </Link>
           <p className="mx-auto mt-6 max-w-md font-sans text-sm leading-relaxed text-white sm:text-base md:text-[1.0625rem]">
             {tagline}
+          </p>
+          <p className="mt-5 font-sans text-sm text-white/90">
+            <a
+              href={SITE_PHONE_TEL}
+              className="text-gold underline-offset-4 transition-colors duration-500 hover:text-white hover:underline"
+            >
+              {SITE_PHONE_DISPLAY}
+            </a>
           </p>
         </div>
 
