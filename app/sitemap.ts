@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { ConvexHttpClient } from "convex/browser";
+import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { legalPages } from "@/lib/legal-copy";
 import { getSiteUrl } from "@/lib/site-url";
@@ -33,15 +33,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ),
   ];
 
-  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-  if (!convexUrl) {
+  if (!process.env.NEXT_PUBLIC_CONVEX_URL) {
     return entries;
   }
 
   try {
-    const client = new ConvexHttpClient(convexUrl);
-
-    const products = await client.query(api.products.listActive, {});
+    const products = await fetchQuery(api.products.listActive, {});
     for (const p of products) {
       entries.push({
         url: `${base}/product/${p.slug}`,
@@ -51,7 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     }
 
-    const posts = await client.query(api.journal.listPublished, { limit: 50 });
+    const posts = await fetchQuery(api.journal.listPublished, { limit: 50 });
     for (const post of posts) {
       entries.push({
         url: `${base}/journal/${post.slug}`,
@@ -61,7 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     }
   } catch {
-    // Build-time or Convex unreachable: keep static URLs only.
+    // Convex unreachable or misconfigured at runtime: static URLs only.
   }
 
   return entries;
