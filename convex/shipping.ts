@@ -18,7 +18,7 @@ export const DELIVERY_OPTIONS = [
     id: "economy_intl",
     label: "Economy international",
     description: "Best value — may take longer on remote routes",
-    cents: 0,
+    cents: 899,
   },
 ] as const;
 
