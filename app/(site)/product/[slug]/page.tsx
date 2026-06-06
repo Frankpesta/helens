@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { getSiteUrl } from "@/lib/site-url";
@@ -6,24 +7,26 @@ import { ProductPageClient } from "./product-page-client";
 
 type Props = { params: Promise<{ slug: string }> };
 
+const getProduct = cache(async (slug: string) => {
+  if (!process.env.NEXT_PUBLIC_CONVEX_URL) return null;
+  try {
+    return await Promise.race([
+      fetchQuery(api.products.getBySlug, { slug }),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
+    ]);
+  } catch {
+    return null;
+  }
+});
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const siteUrl = getSiteUrl();
   const productUrl = `${siteUrl}/product/${slug}`;
-
-  if (!process.env.NEXT_PUBLIC_CONVEX_URL) {
-    return { title: "Product | Helen's Beauty Secret" };
-  }
-
-  let product;
-  try {
-    product = await fetchQuery(api.products.getBySlug, { slug });
-  } catch {
-    return { title: "Product | Helen's Beauty Secret" };
-  }
+  const product = await getProduct(slug);
 
   if (!product) {
-    return { title: "Product Not Found | Helen's Beauty Secret" };
+    return { title: "Product | Helen's Beauty Secret" };
   }
 
   const rawDesc = product.description.replace(/\*\*/g, "");
@@ -31,7 +34,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const imageUrl = product.heroImagePath
     ? `${siteUrl}${product.heroImagePath}`
     : `${siteUrl}/og-image.jpg`;
-
   const title = `${product.name} | Certified Organic Skincare`;
 
   return {
@@ -75,15 +77,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const siteUrl = getSiteUrl();
-
-  let product;
-  try {
-    product = process.env.NEXT_PUBLIC_CONVEX_URL
-      ? await fetchQuery(api.products.getBySlug, { slug })
-      : null;
-  } catch {
-    product = null;
-  }
+  const product = await getProduct(slug);
 
   const jsonLd = product
     ? {
@@ -101,10 +95,7 @@ export default async function ProductPage({ params }: Props) {
               },
             ]
           : undefined,
-        brand: {
-          "@type": "Brand",
-          name: "Helen's Beauty Secret",
-        },
+        brand: { "@type": "Brand", name: "Helen's Beauty Secret" },
         category: "Skincare",
         offers: {
           "@type": "Offer",
@@ -112,10 +103,7 @@ export default async function ProductPage({ params }: Props) {
           price: (product.priceCents / 100).toFixed(2),
           availability: "https://schema.org/InStock",
           url: `${siteUrl}/product/${slug}`,
-          seller: {
-            "@type": "Organization",
-            name: "Helen's Beauty Secret",
-          },
+          seller: { "@type": "Organization", name: "Helen's Beauty Secret" },
         },
         ...(product.ratingAverage && product.ratingCount
           ? {
@@ -135,18 +123,8 @@ export default async function ProductPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: siteUrl,
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Shop",
-        item: `${siteUrl}/shop`,
-      },
+      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 2, name: "Shop", item: `${siteUrl}/shop` },
       {
         "@type": "ListItem",
         position: 3,

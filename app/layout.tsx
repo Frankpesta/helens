@@ -207,19 +207,6 @@ export default function RootLayout({
             `,
           }}
         />
-        <noscript>
-          <a href="https://www.livechat.com/chat-with/19766061/" rel="nofollow">
-            Chat with us
-          </a>
-          , powered by{" "}
-          <a
-            href="https://www.livechat.com/?welcome"
-            rel="noopener nofollow"
-            target="_blank"
-          >
-            LiveChat
-          </a>
-        </noscript>
         <ConvexAuthNextjsServerProvider>
           <Providers>
             {children}
