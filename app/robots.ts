@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/shop", "/product/", "/about", "/journal/", "/contact"],
+        allow: "/",
         disallow: [
           "/admin/",
           "/api/",
@@ -16,10 +16,6 @@ export default function robots(): MetadataRoute.Robots {
           "/cart",
           "/checkout",
         ],
-      },
-      {
-        userAgent: "Googlebot-Image",
-        allow: ["/products/", "/"],
       },
     ],
     sitemap: `${base}/sitemap.xml`,

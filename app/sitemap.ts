@@ -17,11 +17,37 @@ function staticEntry(
   };
 }
 
+// Static product images in /public — always indexable, never expire
+const STATIC_PRODUCT_IMAGES = [
+  { path: "/products/face-cream.png", title: "Helen's Face Cream — Certified Organic Skincare" },
+  { path: "/products/brightening.png", title: "Helen's Brightening Serum — Organic Beauty" },
+  { path: "/products/collagen-booster.png", title: "Helen's Collagen Booster Cream — Natural Skincare" },
+  { path: "/products/age-reversal.png", title: "Helen's Age Reverse Serum — Organic Anti-Aging" },
+  { path: "/products/cleanser.png", title: "Helen's Cleanser — Certified Organic Skin Care" },
+  { path: "/products/anti-blemish.png", title: "Helen's Anti-Blemish Treatment — Clean Beauty" },
+  { path: "/products/mask.png", title: "Helen's Clarifying Mask — Natural Skincare" },
+];
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteUrl();
+
+  const staticImageUrls = STATIC_PRODUCT_IMAGES.map((img) => `${base}${img.path}`);
+
   const entries: MetadataRoute.Sitemap = [
-    staticEntry("", { priority: 1, changeFrequency: "weekly" }),
-    staticEntry("/shop", { priority: 0.9, changeFrequency: "weekly" }),
+    {
+      url: `${base}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 1,
+      images: staticImageUrls,
+    },
+    {
+      url: `${base}/shop`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+      images: staticImageUrls,
+    },
     staticEntry("/about", { priority: 0.85, changeFrequency: "monthly" }),
     staticEntry("/journal", { priority: 0.85, changeFrequency: "weekly" }),
     staticEntry("/contact", { priority: 0.85, changeFrequency: "monthly" }),
@@ -41,7 +67,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const products = await fetchQuery(api.products.listActive, {});
     for (const p of products) {
       const images: MetadataRoute.Sitemap[0]["images"] = [];
-      if (p.heroImagePath) {
+      // Only include heroImagePath if it's a stable public path (not a signed Convex storage URL)
+      if (p.heroImagePath && !p.heroImagePath.includes("convex.cloud")) {
         images.push(`${base}${p.heroImagePath}`);
       }
       entries.push({

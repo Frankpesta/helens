@@ -37,6 +37,7 @@ export const metadata: Metadata = {
   },
   description: defaultDescription,
   applicationName: "Helen's Beauty Secret",
+  alternates: { canonical: siteUrl },
   keywords: [
     "organic skincare",
     "certified organic skin care",
