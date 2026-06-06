@@ -40,25 +40,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const products = await fetchQuery(api.products.listActive, {});
     for (const p of products) {
+      const images: MetadataRoute.Sitemap[0]["images"] = [];
+      if (p.heroImagePath) {
+        images.push(`${base}${p.heroImagePath}`);
+      }
       entries.push({
         url: `${base}/product/${p.slug}`,
         lastModified: new Date(p.updatedAt),
         changeFrequency: "weekly",
-        priority: 0.75,
+        priority: 0.9,
+        images,
       });
     }
 
     const posts = await fetchQuery(api.journal.listPublished, { limit: 50 });
     for (const post of posts) {
+      const images: MetadataRoute.Sitemap[0]["images"] = [];
+      if (post.heroPublicPath) {
+        images.push(`${base}${post.heroPublicPath}`);
+      }
       entries.push({
         url: `${base}/journal/${post.slug}`,
         lastModified: new Date(post.updatedAt),
         changeFrequency: "monthly",
         priority: 0.65,
+        images,
       });
     }
   } catch {
-    // Convex unreachable or misconfigured at runtime: static URLs only.
+    // Convex unreachable at build time — static URLs only.
   }
 
   return entries;

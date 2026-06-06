@@ -1,56 +1,110 @@
-"use client";
-
-import { use } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { useQuery } from "convex/react";
+import type { Metadata } from "next";
+import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
+import { getSiteUrl } from "@/lib/site-url";
+import { JournalPostClient } from "./journal-post-client";
 
-export default function JournalPostPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = use(params);
-  const post = useQuery(api.journal.getBySlug, { slug });
+type Props = { params: Promise<{ slug: string }> };
 
-  if (post === undefined) {
-    return (
-      <div className="py-24 text-center text-sm text-muted-foreground">Loading…</div>
-    );
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const siteUrl = getSiteUrl();
+  const postUrl = `${siteUrl}/journal/${slug}`;
+
+  if (!process.env.NEXT_PUBLIC_CONVEX_URL) {
+    return { title: "Journal | Helen's Beauty Secret" };
+  }
+
+  let post;
+  try {
+    post = await fetchQuery(api.journal.getBySlug, { slug });
+  } catch {
+    return { title: "Journal | Helen's Beauty Secret" };
   }
 
   if (!post || !post.published) {
-    return (
-      <div className="mx-auto max-w-lg px-6 py-24 text-center">
-        <p className="font-heading text-gold">Post not found</p>
-        <Link href="/journal" className="mt-4 inline-block text-gold underline">
-          Journal home
-        </Link>
-      </div>
-    );
+    return { title: "Post Not Found | Helen's Beauty Secret" };
   }
 
+  const imageUrl = post.heroPublicPath
+    ? `${siteUrl}${post.heroPublicPath}`
+    : `${siteUrl}/og-image.jpg`;
+
+  const title = `${post.title} | Helen's Beauty Secret`;
+
+  return {
+    title,
+    description: post.excerpt ?? `${post.title} — skincare tips and insights from Helen's Beauty Secret.`,
+    alternates: { canonical: postUrl },
+    openGraph: {
+      type: "article",
+      url: postUrl,
+      title,
+      description: post.excerpt ?? post.title,
+      siteName: "Helen's Beauty Secret",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: post.excerpt ?? post.title,
+      images: [imageUrl],
+    },
+  };
+}
+
+export default async function JournalPostPage({ params }: Props) {
+  const { slug } = await params;
+  const siteUrl = getSiteUrl();
+
+  let post;
+  try {
+    post = process.env.NEXT_PUBLIC_CONVEX_URL
+      ? await fetchQuery(api.journal.getBySlug, { slug })
+      : null;
+  } catch {
+    post = null;
+  }
+
+  const articleJsonLd =
+    post && post.published
+      ? {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: post.title,
+          description: post.excerpt ?? post.title,
+          image: post.heroPublicPath
+            ? `${siteUrl}${post.heroPublicPath}`
+            : undefined,
+          url: `${siteUrl}/journal/${slug}`,
+          publisher: {
+            "@type": "Organization",
+            name: "Helen's Beauty Secret",
+            logo: {
+              "@type": "ImageObject",
+              url: `${siteUrl}/logo.png`,
+            },
+          },
+        }
+      : null;
+
   return (
-    <article className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
-      <Link href="/journal" className="text-xs uppercase tracking-[0.2em] text-gold">
-        ← Journal
-      </Link>
-      <h1 className="mt-6 font-heading text-4xl text-foreground">{post.title}</h1>
-      <p className="mt-3 text-muted-foreground">{post.excerpt}</p>
-      <div className="relative mt-10 aspect-video overflow-hidden border border-border/40">
-        <Image
-          src={post.heroPublicPath ?? "/products/placeholder.svg"}
-          alt=""
-          fill
-          className="object-cover"
+    <>
+      {articleJsonLd ? (
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger -- structured data for crawlers
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
         />
-      </div>
-      <div className="prose prose-invert prose-headings:font-heading mt-10 max-w-none prose-p:text-muted-foreground prose-strong:text-gold">
-        {post.body.split("\n\n").map((para, i) => (
-          <p key={i}>{para.replace(/^##\s+/, "").replace(/\*\*([^*]+)\*\*/g, "$1")}</p>
-        ))}
-      </div>
-    </article>
+      ) : null}
+      <JournalPostClient slug={slug} />
+    </>
   );
 }

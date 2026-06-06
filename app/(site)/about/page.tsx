@@ -1,8 +1,36 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   AboutCommitmentList,
   AboutExpertColumns,
 } from "@/components/site/expert-blocks";
+import { getSiteUrl } from "@/lib/site-url";
+
+const siteUrl = getSiteUrl();
+
+export const metadata: Metadata = {
+  title: "About Helen's Beauty Secret | Certified Organic Skincare Brand",
+  description:
+    "Learn about Helen's Beauty Secret — a professional organic skincare brand committed to certified organic botanicals, clean formulation, and transparent labeling for healthy, radiant skin.",
+  alternates: { canonical: `${siteUrl}/about` },
+  keywords: [
+    "organic skincare brand",
+    "certified organic beauty",
+    "natural skincare company",
+    "clean beauty brand",
+    "about Helen's Beauty Secret",
+    "organic ingredients skincare",
+  ],
+  openGraph: {
+    type: "website",
+    url: `${siteUrl}/about`,
+    title: "About Helen's Beauty Secret | Certified Organic Skincare",
+    description:
+      "Professional organic skincare brand committed to certified botanicals, transparent labeling, and barrier-first formulation.",
+    siteName: "Helen's Beauty Secret",
+    images: [{ url: `${siteUrl}/og-image.jpg`, width: 1200, height: 630, alt: "Helen's Beauty Secret" }],
+  },
+};
 
 export default function AboutPage() {
   return (

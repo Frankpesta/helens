@@ -35,7 +35,7 @@ export default function JournalIndexPage() {
               <div className="relative aspect-video overflow-hidden border border-border/40">
                 <Image
                   src={post.heroPublicPath ?? "/products/placeholder.svg"}
-                  alt=""
+                  alt={post.title}
                   fill
                   className="object-cover transition duration-500 group-hover:scale-[1.02]"
                 />

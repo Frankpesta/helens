@@ -133,7 +133,7 @@ export default function HomePage() {
                 >
                   <Image
                     src={large.heroImagePath ?? "/products/placeholder.svg"}
-                    alt={large.name}
+                    alt={`${large.name} — certified organic skincare by Helen's Beauty Secret`}
                     fill
                     className="object-cover"
                     sizes="(min-width: 768px) 35vw, 100vw"
@@ -181,7 +181,7 @@ export default function HomePage() {
                   <Link href={`/product/${side.slug}`}>
                     <Image
                       src={side.heroImagePath ?? "/products/placeholder.svg"}
-                      alt={side.name}
+                      alt={`${side.name} — natural organic beauty product`}
                       fill
                       className="object-cover"
                       sizes="(min-width: 768px) 40vw, 100vw"
@@ -240,7 +240,7 @@ export default function HomePage() {
                 >
                   <Image
                     src={p.heroImagePath ?? "/products/placeholder.svg"}
-                    alt={p.name}
+                    alt={`${p.name} — organic skincare product by Helen's Beauty Secret`}
                     fill
                     className="object-cover transition-transform duration-700 hover:scale-[1.02]"
                     sizes="(max-width: 479px) 100vw, (max-width: 767px) 50vw, 33vw"
