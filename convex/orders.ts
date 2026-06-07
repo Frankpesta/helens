@@ -70,6 +70,27 @@ export const listForAdmin = query({
   },
 });
 
+export const listForAdminPaginated = query({
+  args: {
+    status: v.optional(orderStatusFilter),
+    paginationOpts: v.object({
+      numItems: v.number(),
+      cursor: v.union(v.string(), v.null()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    if (args.status !== undefined) {
+      return await ctx.db
+        .query("orders")
+        .withIndex("by_status", (q) => q.eq("status", args.status!))
+        .order("desc")
+        .paginate(args.paginationOpts);
+    }
+    return await ctx.db.query("orders").order("desc").paginate(args.paginationOpts);
+  },
+});
+
 /** Admin status changes (post-payment workflow + cancel). Triggers customer email via scheduler. */
 export const setAdminStatus = mutation({
   args: {
