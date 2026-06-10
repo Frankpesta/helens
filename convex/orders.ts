@@ -6,6 +6,7 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 import { requireAdmin } from "./lib/authz";
 
 const orderStatusFilter = v.union(
@@ -73,10 +74,7 @@ export const listForAdmin = query({
 export const listForAdminPaginated = query({
   args: {
     status: v.optional(orderStatusFilter),
-    paginationOpts: v.object({
-      numItems: v.number(),
-      cursor: v.union(v.string(), v.null()),
-    }),
+    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
