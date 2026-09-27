@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { legalPages } from "@/lib/legal-copy";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const doc = legalPages[slug];
+  if (!doc) notFound();
+  return { title: doc.title, description: doc.body[0], alternates: { canonical: "/legal/" + slug } };
+}
 
 export function generateStaticParams() {
   return Object.keys(legalPages).map((slug) => ({ slug }));

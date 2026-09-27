@@ -1,40 +1,23 @@
 import type { Metadata } from "next";
-import { cache } from "react";
-import { fetchQuery } from "convex/nextjs";
-import { api } from "@/convex/_generated/api";
+import { notFound } from "next/navigation";
+import { getProduct } from "@/lib/storefront-data";
+import { absoluteImageUrl, plainDescription, serializeJsonLd } from "@/lib/seo";
 import { getSiteUrl } from "@/lib/site-url";
 import { ProductPageClient } from "./product-page-client";
 
 type Props = { params: Promise<{ slug: string }> };
 
-const getProduct = cache(async (slug: string) => {
-  if (!process.env.NEXT_PUBLIC_CONVEX_URL) return null;
-  try {
-    return await Promise.race([
-      fetchQuery(api.products.getBySlug, { slug }),
-      new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
-    ]);
-  } catch {
-    return null;
-  }
-});
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const siteUrl = getSiteUrl();
   const productUrl = `${siteUrl}/product/${slug}`;
-  const product = await getProduct(slug);
+  const data = await getProduct(slug);
+  if (!data) notFound();
+  const { product, gallery } = data;
 
-  if (!product) {
-    return { title: "Product | Helen's Beauty Secret" };
-  }
-
-  const rawDesc = product.description.replace(/\*\*/g, "");
-  const description = `${rawDesc.slice(0, 140)}… Shop certified organic skincare at Helen's Beauty Secret.`;
-  const imageUrl = product.heroImagePath
-    ? `${siteUrl}${product.heroImagePath}`
-    : `${siteUrl}/og-image.jpg`;
-  const title = `${product.name} | Certified Organic Skincare`;
+  const description = product.seoDescription?.trim() || plainDescription(product.description).slice(0, 160);
+  const imageUrl = absoluteImageUrl(gallery[0]?.url ?? product.heroImagePath);
+  const title = product.seoTitle?.trim() || product.name;
 
   return {
     title,
@@ -58,9 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: "Helen's Beauty Secret",
       images: [
         {
-          url: imageUrl,
-          width: 1200,
-          height: 1500,
+          url: imageUrl ?? `${siteUrl}/og-image.jpg`,
           alt: `${product.name} — certified organic skincare by Helen's Beauty Secret`,
         },
       ],
@@ -69,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [imageUrl],
+      images: imageUrl ? [imageUrl] : [],
     },
   };
 }
@@ -77,7 +58,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const siteUrl = getSiteUrl();
-  const product = await getProduct(slug);
+  const data = await getProduct(slug);
+  if (!data) notFound();
+  const { product, gallery } = data;
 
   const jsonLd = product
     ? {
@@ -86,22 +69,16 @@ export default async function ProductPage({ params }: Props) {
         name: product.name,
         description: product.description.replace(/\*\*/g, ""),
         url: `${siteUrl}/product/${slug}`,
-        image: product.heroImagePath
-          ? [
-              {
-                "@type": "ImageObject",
-                url: `${siteUrl}${product.heroImagePath}`,
-                name: `${product.name} — organic skincare by Helen's Beauty Secret`,
-              },
-            ]
-          : undefined,
+        image: [...new Set([...gallery.map((g) => g.url), product.heroImagePath].map(absoluteImageUrl).filter((url): url is string => Boolean(url)))],
         brand: { "@type": "Brand", name: "Helen's Beauty Secret" },
         category: "Skincare",
         offers: {
           "@type": "Offer",
           priceCurrency: product.currency,
           price: (product.priceCents / 100).toFixed(2),
-          availability: "https://schema.org/InStock",
+          availability: product.trackInventory && (product.inventoryCount ?? 0) <= 0
+            ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+          itemCondition: "https://schema.org/NewCondition",
           url: `${siteUrl}/product/${slug}`,
           seller: { "@type": "Organization", name: "Helen's Beauty Secret" },
         },
@@ -139,16 +116,14 @@ export default async function ProductPage({ params }: Props) {
       {jsonLd ? (
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger -- structured data for crawlers
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
         />
       ) : null}
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger -- structured data for crawlers
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
       />
-      <ProductPageClient slug={slug} />
+      <ProductPageClient slug={slug} initialProduct={product} initialGallery={gallery} />
     </>
   );
 }

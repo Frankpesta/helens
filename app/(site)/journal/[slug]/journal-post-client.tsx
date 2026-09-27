@@ -1,13 +1,14 @@
 "use client";
 
-import { use } from "react";
+import { journalImagePath } from "@/lib/journal-image";
 import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
-export function JournalPostClient({ slug }: { slug: string }) {
-  const post = useQuery(api.journal.getBySlug, { slug });
+export function JournalPostClient({ slug, initialPost }: { slug: string; initialPost: import("@/convex/_generated/dataModel").Doc<"journalPosts"> }) {
+  const livePost = useQuery(api.journal.getBySlug, { slug });
+  const post = livePost === undefined ? initialPost : livePost;
 
   if (post === undefined) {
     return (
@@ -35,7 +36,7 @@ export function JournalPostClient({ slug }: { slug: string }) {
       <p className="mt-3 text-muted-foreground">{post.excerpt}</p>
       <div className="relative mt-10 aspect-video overflow-hidden border border-border/40">
         <Image
-          src={post.heroPublicPath ?? "/products/placeholder.svg"}
+          src={journalImagePath(post.heroPublicPath) ?? "/og-image.jpg"}
           alt={post.title}
           fill
           className="object-cover"

@@ -1,3 +1,4 @@
+import { getProducts } from "@/lib/storefront-data";
 import type { Metadata } from "next";
 import { getSiteUrl } from "@/lib/site-url";
 import { ShopPageClient } from "./shop-page-client";
@@ -6,7 +7,7 @@ const siteUrl = getSiteUrl();
 const shopUrl = `${siteUrl}/shop`;
 
 export const metadata: Metadata = {
-  title: "Shop Organic Skincare Products | Helen's Beauty Secret",
+  title: "Shop Organic Skincare Products",
   description:
     "Browse certified organic skincare products at Helen's Beauty Secret. Shop natural face creams, serums, moisturizers, and beauty products made with organic botanicals.",
   alternates: { canonical: shopUrl },
@@ -47,6 +48,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ShopPage() {
-  return <ShopPageClient />;
+export default async function ShopPage() {
+  const products = await getProducts();
+  return <ShopPageClient initialProducts={products} />;
 }

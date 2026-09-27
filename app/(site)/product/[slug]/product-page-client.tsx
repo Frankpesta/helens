@@ -1,6 +1,5 @@
 "use client";
 
-import { use, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "convex/react";
@@ -16,12 +15,18 @@ import { ProductExpertDisclaimerBand } from "@/components/site/expert-blocks";
 
 const featureIcons = [Sparkles, Droplets, Shield];
 
-export function ProductPageClient({ slug }: { slug: string }) {
-  const product = useQuery(api.products.getBySlug, { slug });
-  const gallery = useQuery(
+export function ProductPageClient({ slug, initialProduct, initialGallery }: {
+  slug: string;
+  initialProduct: import("@/convex/_generated/dataModel").Doc<"products">;
+  initialGallery: { url: string; alt: string }[];
+}) {
+  const liveProduct = useQuery(api.products.getBySlug, { slug });
+  const product = liveProduct === undefined ? initialProduct : liveProduct;
+  const liveGallery = useQuery(
     api.products.getGallery,
     product ? { productId: product._id } : "skip",
   );
+  const gallery = liveGallery === undefined ? initialGallery : liveGallery;
   const beforeAfter = useQuery(
     api.products.getBeforeAfterGallery,
     product ? { productId: product._id } : "skip",
@@ -35,7 +40,7 @@ export function ProductPageClient({ slug }: { slug: string }) {
     );
   }
 
-  if (product === null) {
+  if (product === null || !product.isActive) {
     return (
       <div className="mx-auto max-w-lg px-6 py-24 text-center">
         <p className="font-heading text-gold">Product not found</p>
@@ -67,7 +72,7 @@ export function ProductPageClient({ slug }: { slug: string }) {
           <div className="relative h-[min(70vh,560px)] w-full overflow-hidden bg-surface-container-lowest md:h-screen">
             <Image
               src={mainSrc}
-              alt={`${product.name} — certified organic skincare by Helen's Beauty Secret`}
+              alt={gallery[0]?.alt || `${product.name} by Helen's Beauty Secret`}
               fill
               priority
               className="object-cover opacity-95 transition-transform duration-[2000ms] hover:scale-100 md:scale-105"
@@ -102,7 +107,7 @@ export function ProductPageClient({ slug }: { slug: string }) {
             {product.name}
           </h1>
           <p className="font-heading mt-4 text-2xl text-gold">
-            {formatMoney(product.priceCents)}
+            {formatMoney(product.priceCents, product.currency)}
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             {product.ratingAverage ? (
@@ -150,6 +155,7 @@ export function ProductPageClient({ slug }: { slug: string }) {
               <h2 className="font-heading text-2xl text-on-surface md:text-3xl">
                 Ingredients
               </h2>
+              <Link href="/ingredients" className="mt-3 inline-block text-sm text-gold underline">Explore our ingredient index</Link>
               {product.ingredients && product.ingredients.length > 0 ? (
                 <ul className="mt-6 list-none space-y-2.5 font-sans text-sm leading-relaxed text-on-surface-variant">
                   {product.ingredients.map((ing) => (
@@ -163,7 +169,7 @@ export function ProductPageClient({ slug }: { slug: string }) {
                 </ul>
               ) : (
                 <p className="mt-6 font-sans text-sm text-on-surface-variant">
-                  Full ingredient lists appear below each SKU; our care team
+                  Our care team
                   can answer formulation questions on request.
                 </p>
               )}

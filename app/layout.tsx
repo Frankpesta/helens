@@ -8,6 +8,7 @@ import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { getSiteUrl } from "@/lib/site-url";
 import { SITE_PHONE_TEL } from "@/lib/site-contact";
 import Script from "next/script";
+import { serializeJsonLd } from "@/lib/seo";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -37,7 +38,6 @@ export const metadata: Metadata = {
   },
   description: defaultDescription,
   applicationName: "Helen's Beauty Secret",
-  alternates: { canonical: siteUrl },
   keywords: [
     "organic skincare",
     "certified organic skin care",
@@ -119,45 +119,6 @@ const websiteJsonLd = {
   },
 } as const;
 
-const faqJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: [
-    {
-      "@type": "Question",
-      name: "Are your organic skincare products appropriate for sensitive skin?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "We formulate for broad tolerability, but \"sensitive\" is individual. Patch test new organic skincare products for 24–48 hours and introduce one formula at a time. Discontinue if irritation persists.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What does \"certified organic\" mean for your skincare products?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "We emphasize certified-organic botanical inputs where marketing and regulatory language allow. Full INCI lists on each product page are the authoritative breakdown — organic claims on packaging follow certification rules for that SKU.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What are the best organic skincare products for a daily routine?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Start with your non-negotiables: a certified organic cleanser, hydrating moisturizer, and daytime SPF protection. Add organic serums or treatment products gradually so you can observe how your skin responds to natural ingredients.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Are Helen's Beauty Secret products clean beauty and non-toxic?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Yes. Helen's Beauty Secret products are formulated without parabens and with certified organic botanicals, full INCI transparency, and stability-tested preservation — meeting professional clean beauty standards.",
-      },
-    },
-  ],
-} as const;
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -176,23 +137,14 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col bg-background font-sans antialiased">
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger -- JSON-LD for crawlers
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationJsonLd),
+            __html: serializeJsonLd(organizationJsonLd),
           }}
         />
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger -- JSON-LD for crawlers
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(websiteJsonLd),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          // eslint-disable-next-line react/no-danger -- FAQ structured data for Google rich results
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(faqJsonLd),
+            __html: serializeJsonLd(websiteJsonLd),
           }}
         />
         <Script

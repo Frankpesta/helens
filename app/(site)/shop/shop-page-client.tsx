@@ -20,12 +20,14 @@ import { productMatchesSearchQuery } from "@/lib/shop-search";
 import type { Id } from "@/convex/_generated/dataModel";
 import { X } from "lucide-react";
 
-function ShopPageInner() {
+type Props = { initialProducts: import("@/convex/_generated/dataModel").Doc<"products">[] };
+
+function ShopPageInner({ initialProducts }: Props) {
   const searchParams = useSearchParams();
   const qRaw = searchParams.get("q");
   const q = typeof qRaw === "string" ? qRaw.trim() : "";
 
-  const products = useQuery(api.products.listActive);
+  const products = useQuery(api.products.listActive) ?? initialProducts;
   const add = useCartStore((s) => s.add);
   const pulseBag = useCartStore((s) => s.pulseBag);
 
@@ -87,6 +89,7 @@ function ShopPageInner() {
         </div>
       ) : null}
 
+      <p className="mb-8"><Link href="/ingredients" className="text-gold underline underline-offset-4">Browse skincare by ingredient</Link></p>
       <ShopTrustRow />
       <ShopGuidanceBlock />
 
@@ -131,7 +134,7 @@ function ShopPageInner() {
                   {p.description.replace(/\*\*/g, "")}
                 </p>
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-gold">{formatMoney(p.priceCents)}</span>
+                  <span className="text-gold">{formatMoney(p.priceCents, p.currency)}</span>
                   <button
                     type="button"
                     className="origin-center text-sm font-medium uppercase tracking-[0.15em] text-gold hover:underline"
@@ -155,7 +158,7 @@ function ShopPageInner() {
   );
 }
 
-export function ShopPageClient() {
+export function ShopPageClient({ initialProducts }: Props) {
   return (
     <Suspense
       fallback={
@@ -164,7 +167,7 @@ export function ShopPageClient() {
         </div>
       }
     >
-      <ShopPageInner />
+      <ShopPageInner initialProducts={initialProducts} />
     </Suspense>
   );
 }
